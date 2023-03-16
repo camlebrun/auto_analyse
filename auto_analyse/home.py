@@ -86,65 +86,67 @@ with tab4:
     if dataframe is not None:
 
         col_list = list(dataframe.columns[:-1].unique())
-        selected_columns_exp = st.multiselect("Sélectionner la ou les valeur(s) explicatives", dataframe.columns, default=col_list)
+        selected_columns_exp = st.multiselect("Sélectionner la ou les valeur(s) explicatives", dataframe.columns)
         unselected_columns = list(set(col_list) - set(selected_columns_exp))
-        selected_columns_pred = st.multiselect("Sélectionner la ou les valeur(s) à prédire", dataframe.columns, default=[dataframe.columns[-1]])
+        selected_columns_pred = st.multiselect("Sélectionner la ou les valeur(s) à prédire", dataframe.columns)
 
         X = dataframe[selected_columns_exp]
         y = dataframe[selected_columns_pred]
-
-        # Split des données en train et test
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+        if len(selected_columns_exp) > 0 and len(selected_columns_pred) > 0:
 
-        normalisation = st.selectbox("Choisir une méthode de normalisation", ["Aucune", "MinMax Scaler", "Standard Scaler"])
-        if normalisation == "Aucune":
-            X_train_std = X_train
-            X_test_std = X_test
-        elif normalisation == "MinMax Scaler":
-            scaler = MinMaxScaler()
-            X_train_std = scaler.fit_transform(X_train)
-            X_test_std = scaler.transform(X_test)
-        else:
-            scaler = StandardScaler()
-            X_train_std = scaler.fit_transform(X_train)
-            X_test_std = scaler.transform(X_test)
-        
-        model = st.selectbox("Choisir un modèle", ["Régression linéaire simple", "Régression logistique"])
-        if model == "Régression linéaire simple":
-            # Régression linéaire sur les données normalisées
-            reg_lin = LinearRegression()
-            reg_lin.fit(X_train_std, y_train)
+            # Split des données en train et test
+            
 
-            # Evaluation du modèle sur les données de test
-            y_pred = reg_lin.predict(X_test_std)
-            r2 = r2_score(y_test, y_pred)
-            st.write("R2 score : ", r2.round(decimals=2))
-            mse = mean_squared_error(y_test, y_pred)
-            st.write("MSE : ", mse.round(decimals=2))
-            mape = mean_absolute_percentage_error(y_test, y_pred)
-            st.write("MAPE : ", mape.round(decimals=2))
-            fig, ax = plt.subplots()
-            ax.scatter(y_test, y_pred)
-            ax.set_xlabel("Valeurs réelles")
-            ax.set_ylabel("Valeurs prédites")
-            st.pyplot(fig)
-            plt.clf()
-        if model == "Régression logistique":
-            # Régression logistique sur les données normalisées
-            reg_log = LogisticRegression()
-            reg_log.fit(X_train_std, y_train)
+            normalisation = st.selectbox("Choisir une méthode de normalisation", ["Aucune", "MinMax Scaler", "Standard Scaler"])
+            if normalisation == "Aucune":
+                X_train_std = X_train
+                X_test_std = X_test
+            elif normalisation == "MinMax Scaler":
+                scaler = MinMaxScaler()
+                X_train_std = scaler.fit_transform(X_train)
+                X_test_std = scaler.transform(X_test)
+            else:
+                scaler = StandardScaler()
+                X_train_std = scaler.fit_transform(X_train)
+                X_test_std = scaler.transform(X_test)
 
-            # Evaluation du modèle sur les données de test
-            y_pred = reg_log.predict(X_test_std)
-            r2 = r2_score(y_test, y_pred)
-            st.write("R2 score : ", r2.round(decimals=2))
-            mse = mean_squared_error(y_test, y_pred)
-            st.write("MSE : ", mse.round(decimals=2))
-            mape = mean_absolute_percentage_error(y_test, y_pred)
-            st.write("MAPE : ", mape.round(decimals=2))
-            fig, ax = plt.subplots()
-            ax.scatter(y_test, y_pred)
-            ax.set_xlabel("Valeurs réelles")
-            ax.set_ylabel("Valeurs prédites")
-            st.pyplot(fig)
-            plt.clf()
+            model = st.selectbox("Choisir un modèle", ["Régression linéaire simple", "Régression logistique"])
+            if model == "Régression linéaire simple":
+                # Régression linéaire sur les données normalisées
+                reg_lin = LinearRegression()
+                reg_lin.fit(X_train_std, y_train)
+
+                # Evaluation du modèle sur les données de test
+                y_pred = reg_lin.predict(X_test_std)
+                r2 = r2_score(y_test, y_pred)
+                st.write("R2 score : ", r2.round(decimals=2))
+                mse = mean_squared_error(y_test, y_pred)
+                st.write("MSE : ", mse.round(decimals=2))
+                mape = mean_absolute_percentage_error(y_test, y_pred)
+                st.write("MAPE : ", mape.round(decimals=2))
+                fig, ax = plt.subplots()
+                ax.scatter(y_test, y_pred)
+                ax.set_xlabel("Valeurs réelles")
+                ax.set_ylabel("Valeurs prédites")
+                st.pyplot(fig)
+                plt.clf()
+            if model == "Régression logistique":
+                # Régression logistique sur les données normalisées
+                reg_log = LogisticRegression()
+                reg_log.fit(X_train_std, y_train)
+
+                # Evaluation du modèle sur les données de test
+                y_pred = reg_log.predict(X_test_std)
+                r2 = r2_score(y_test, y_pred)
+                st.write("R2 score : ", r2.round(decimals=2))
+                mse = mean_squared_error(y_test, y_pred)
+                st.write("MSE : ", mse.round(decimals=2))
+                mape = mean_absolute_percentage_error(y_test, y_pred)
+                st.write("MAPE : ", mape.round(decimals=2))
+                #fig, ax = plt.subplots()
+                #ax.scatter(y_test, y_pred)
+                #ax.set_xlabel("Valeurs réelles")
+                #ax.set_ylabel("Valeurs prédites")
+                #st.pyplot(fig)
+                #plt.clf()
