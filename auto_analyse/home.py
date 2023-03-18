@@ -1,5 +1,6 @@
 import pandas as pd
 import time
+import math
 import streamlit as st
 from io import StringIO
 import numpy as np
@@ -8,9 +9,9 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score
 from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import mean_absolute_percentage_error
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, LabelEncoder
+from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error
+
 st.set_page_config(layout="wide")
 st.title("Analyse de données")
 
@@ -18,7 +19,7 @@ st.title("Analyse de données")
 dataframe = None
 
 # Onglets
-tab1, tab2, tab3, tab4= st.tabs(["Analyse", "Modélisation", "Correlation","Prédiction"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Upload & data exploration","Traitements des données","Scatter plot", "Paireplot","Corrélation", "Prédictions"])
 
 # Page d'analyse
 with tab1:
@@ -28,14 +29,14 @@ with tab1:
                 if uploaded_file.type == 'text/csv':
                     with st.spinner("Analyse en cours..."):
                         with gauche:
-                            sep = st.selectbox("Sélectionner un séparateur :", [",", ";", "\t"])
+                            sep = st.selectbox("Sélectionner un séparateur :", [",", ";", "tab"])
                         with droite:
-                            encoding = st.selectbox("Sélectionner un formatage :", ["UTF-8", "ISO-8859-1"])
-                        if sep == "\t":
-                            dataframe = pd.read_csv(StringIO(uploaded_file.getvalue().decode(encoding)), sep="\t")
+                            encoding = st.selectbox("Sélectionner un formatage :", ["UTF-8", "ISO-8859-1","ASCII","UTF_8_SIG","UTF_16", "CP437"])
+                        if sep == sep:
+                            dataframe = pd.read_csv(StringIO(uploaded_file.getvalue().decode(encoding)), sep=sep)
                             st.dataframe(dataframe)
                         else:
-                            dataframe = pd.read_csv(StringIO(uploaded_file.getvalue().decode(encoding)), sep=sep)
+                            dataframe = pd.read_csv(StringIO(uploaded_file.getvalue().decode(encoding)), sep="/t")
                             st.dataframe(dataframe)
                         with droite:
                             float_cols = dataframe.select_dtypes(include=['float64']).columns
@@ -48,17 +49,128 @@ with tab1:
                         st.write("Nombre de lignes et colonnes",dataframe.shape)
                         st.write("Statistiques descriptives :")
                         st.dataframe(dataframe.describe())
+                    if dataframe is not None:
+                        st.title("Visualisation des données")
+                        col_list = list(dataframe.columns[:-1].unique())
+                        x_val = st.selectbox("Sélectionner la valeur en x", col_list)
+                        y_val = st.selectbox("Sélectionner la valeur en y", col_list)
+                    if x_val == y_val:
+                        st.info("X et Y doivent être différentes")   
+                    elif dataframe is not None and x_val is not None and y_val is not None:
+                        with st.spinner('Wait for it...'):
+                            time.sleep(5)
+                            fig, ax = plt.subplots()
+                            ax.scatter(dataframe[x_val], dataframe[y_val])
+                            ax.set_xlabel(x_val)
+                            ax.set_ylabel(y_val)
+                            st.pyplot(fig)
+                            plt.clf()    
     else:
                     st.error("Le fichier n'a pas été chargé correctement. Veuillez vérifier le format du fichier et réessayer.")
 
+with tab2:
+    if dataframe is not None:
+        with st.spinner('Wait for it...'):
+            time.sleep(5)
+        st.title("Prétraitement")
+        def preprocess_column(column, option, x = None):
+            if option == "Pas de modification":
+                 pass
+            if option == "Supprimer NaN":
+                column = column.fillna(value=np.nan).dropna()
+            elif option == "Fill par 0":
+                column = column.fillna(0)
+            elif option == "Fill Mean":
+                column = column.fillna(column.mean())
+            elif option == "Fill Median":
+                column = column.fillna(column.median())
+            elif option == "Encoding":
+                encoder = LabelEncoder()
+                column = encoder.fit_transform(column)
+            elif option == "Arrondir":
+                column = column.round(x)
+            return column
+
+        def split_list(lst):
+            middle = math.ceil(len(lst) / 2)
+            return lst[:middle], lst[middle:]
+
+        col1, col2 = st.columns(2)
+        col_names1, col_names2 = split_list(dataframe.columns)
+        col1, col2 = st.columns(2)
+        dataframe_0 = dataframe.copy()
+        x = st.number_input("Choisir le nombre de décimales", min_value=1, max_value=4, value=1)
+        with col1:
+            for col in col_names1:
+                option = st.radio(f"Choisir une option de prétraitement pour la colonne {col}", ["Pas de modification", "Supprimer NaN", "Fill par 0", "Fill Mean", "Fill Median", "Encoding", "Arrondir"])
+                processed_col = preprocess_column(dataframe[col], option, x)
+                dataframe_0[col] = processed_col
+        with col2:
+            for col in col_names2:
+                option = st.radio(f"Choisir une option de prétraitement pour la colonne {col}", ["Pas de modification", "Supprimer NaN", "Fill par 0", "Fill Mean", "Fill Median", "Encoding", "Arrondir"])
+                processed_col = preprocess_column(dataframe[col], option, x)
+                dataframe_0[col] = processed_col
+            old_val = None
+            new_val = None
+            replace_val = st.text_input("Remplacer les valeurs", value= old_val)
+            by_val = st.text_input("Remplacer par", value=new_val)
+            if replace_val != old_val or by_val != new_val:
+                dataframe_0_new = dataframe_0.replace(replace_val, by_val)
+                dataframe_0 = dataframe_0_new
+                old_val = replace_val
+                new_val = by_val
+
+
+
+        col3, col4 = st.columns(2)
+        with col3:
+            st.write("Données avant prétraitement")
+            st.dataframe(dataframe)
+            st.write(dataframe.shape)
+        with col4:
+            st.write("Données après prétraitement")
+            st.dataframe(dataframe_0)
+            st.write(dataframe_0.shape)
+        @st.cache_data
+        def convert_df(df):
+            # IMPORTANT: Cache the conversion to prevent computation on every rerun
+            return df.to_csv().encode('utf-8')
+
+        csv = convert_df(dataframe_0)
+
+        st.download_button(
+            label="Download data as CSV",
+            data=csv,
+            file_name='large_df.csv',
+            mime='text/csv',
+        )
+with tab3:
+    st.title("Visualisation")
+    st.write("Les données affichées sont celles du fichier modifiable dans l'onglet traitement des données")
+    if dataframe is not None:
+        col_list_0 = list(dataframe_0.columns[:-1].unique())
+        st.markdown(col_list)
+        x_val_0 = st.selectbox("Sélectionner la valeur en x", col_list_0, key='unique_key_1')
+        y_val_0 = st.selectbox("Sélectionner la valeur en y", col_list_0, key='unique_key_2')
+    if x_val_0 == y_val_0:
+        st.info("X et Y doivent être différentes")   
+    elif dataframe is not None and x_val_0 is not None and y_val_0 is not None:
+        with st.spinner('Wait for it...'):
+            time.sleep(5)
+            fig, ax = plt.subplots()
+            ax.scatter(dataframe_0[x_val_0], dataframe_0[y_val_0])
+            ax.set_xlabel(x_val_0)
+            ax.set_ylabel(y_val_0)
+            st.pyplot(fig)
+            plt.clf()       
 
 # Page de modélisation
-with tab2:
+with tab4:
     st.write("Modélisation")
     if dataframe is not None:
         with st.spinner('Wait for it...'):
             time.sleep(5)
-            fig_pairplot = sns.pairplot(dataframe, diag_kind='kde', corner=True)
+            fig_pairplot = sns.pairplot(dataframe_0, diag_kind='kde', corner=True)
             fig_pairplot.fig.set_size_inches(15, 10)
             axes = fig_pairplot.axes
             for i in range(len(axes)):
@@ -75,12 +187,12 @@ with tab2:
                     plt.clf()
 
 
-with tab3:
+with tab5:
     st.write("Correlation")
     if dataframe is not None:
         with st.spinner('Wait for it...'):
             time.sleep(5)
-        corr_matrix = round (dataframe.corr(),2)
+        corr_matrix = round (dataframe_0.corr(),2)
         headmap_cor = sns.heatmap(corr_matrix, annot=True, cmap='Reds', linewidths=0.2)
         headmap_cor = headmap_cor.get_figure()
         headmap_cor.set_size_inches(8, 6)
@@ -89,18 +201,18 @@ with tab3:
 
 
 
-with tab4:
+with tab6:
     st.write("Prédiction")
     d,g = st.columns(2)
     if dataframe is not None:
-
-        col_list = list(dataframe.columns[:-1].unique())
-        selected_columns_exp = st.multiselect("Sélectionner la ou les valeur(s) explicatives", dataframe.columns)
+        
+        col_list = list(dataframe_0.columns[:-1].unique())
+        selected_columns_exp = st.multiselect("Sélectionner la ou les valeur(s) explicatives", dataframe_0.columns)
         unselected_columns = list(set(col_list) - set(selected_columns_exp))
-        selected_columns_pred = st.multiselect("Sélectionner la ou les valeur(s) à prédire", dataframe.columns)
+        selected_columns_pred = st.multiselect("Sélectionner la ou les valeur(s) à prédire", dataframe_0.columns)
 
-        X = dataframe[selected_columns_exp]
-        y = dataframe[selected_columns_pred]
+        X = dataframe_0[selected_columns_exp]
+        y = dataframe_0[selected_columns_pred]
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
         if len(selected_columns_exp) > 0 and len(selected_columns_pred) > 0:
             with st.spinner('Wait for it...'):
