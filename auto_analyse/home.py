@@ -141,7 +141,7 @@ with tab2:
         st.download_button(
             label="Download data as CSV",
             data=csv,
-            file_name='large_df.csv',
+            file_name='output.csv',
             mime='text/csv',
         )
 with tab3:
@@ -152,17 +152,17 @@ with tab3:
         st.markdown(col_list)
         x_val_0 = st.selectbox("Sélectionner la valeur en x", col_list_0, key='unique_key_1')
         y_val_0 = st.selectbox("Sélectionner la valeur en y", col_list_0, key='unique_key_2')
-    if x_val_0 == y_val_0:
-        st.info("X et Y doivent être différentes")   
-    elif dataframe is not None and x_val_0 is not None and y_val_0 is not None:
-        with st.spinner('Wait for it...'):
-            time.sleep(5)
-            fig, ax = plt.subplots()
-            ax.scatter(dataframe_0[x_val_0], dataframe_0[y_val_0])
-            ax.set_xlabel(x_val_0)
-            ax.set_ylabel(y_val_0)
-            st.pyplot(fig)
-            plt.clf()       
+        if x_val_0 == y_val_0:
+            st.info("X et Y doivent être différentes")   
+        elif dataframe is not None and x_val_0 is not None and y_val_0 is not None:
+            with st.spinner('Wait for it...'):
+                time.sleep(5)
+                fig, ax = plt.subplots()
+                ax.scatter(dataframe_0[x_val_0], dataframe_0[y_val_0])
+                ax.set_xlabel(x_val_0)
+                ax.set_ylabel(y_val_0)
+                st.pyplot(fig)
+                plt.clf()       
 
 # Page de modélisation
 with tab4:
@@ -234,8 +234,8 @@ with tab6:
                     X_train_std = scaler.fit_transform(X_train)
                     X_test_std = scaler.transform(X_test)
 
-                model = st.selectbox("Choisir un modèle", ["Régression linéaire simple", "Régression logistique"])
-                if model == "Régression linéaire simple":
+                model = st.selectbox("Choisir un modèle", ["Régression linéaire", "Régression logistique"])
+                if model == "Régression linéaire":
                     with st.spinner('Wait for it...'):
                         time.sleep(5)
 
