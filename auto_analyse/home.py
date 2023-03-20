@@ -35,6 +35,7 @@ with tab1:
                         if sep == sep:
                             dataframe = pd.read_csv(StringIO(uploaded_file.getvalue().decode(encoding)), sep=sep)
                             st.dataframe(dataframe)
+                            
                         else:
                             dataframe = pd.read_csv(StringIO(uploaded_file.getvalue().decode(encoding)), sep="/t")
                             st.dataframe(dataframe)
@@ -168,9 +169,10 @@ with tab3:
 with tab4:
     st.write("Modélisation")
     if dataframe is not None:
+        dataframe_num = dataframe_0.select_dtypes(include=[np.number])
         with st.spinner('Wait for it...'):
             time.sleep(5)
-            fig_pairplot = sns.pairplot(dataframe_0, diag_kind='kde', corner=True)
+            fig_pairplot = sns.pairplot(dataframe_num, diag_kind='kde', corner=True)
             fig_pairplot.fig.set_size_inches(15, 10)
             axes = fig_pairplot.axes
             for i in range(len(axes)):
@@ -190,14 +192,16 @@ with tab4:
 with tab5:
     st.write("Correlation")
     if dataframe is not None:
+        dataframe_num = dataframe_0.select_dtypes(include=[np.number])
         with st.spinner('Wait for it...'):
             time.sleep(5)
-        corr_matrix = round (dataframe_0.corr(),2)
+        corr_matrix = round (dataframe_num.corr(),2)
         headmap_cor = sns.heatmap(corr_matrix, annot=True, cmap='Reds', linewidths=0.2)
         headmap_cor = headmap_cor.get_figure()
         headmap_cor.set_size_inches(8, 6)
         if headmap_cor is not None:
             st.pyplot(headmap_cor)
+            
 
 
 
@@ -252,6 +256,7 @@ with tab6:
                         ax.scatter(y_test, y_pred)
                         ax.set_xlabel("Valeurs réelles")
                         ax.set_ylabel("Valeurs prédites")
+                        st.balloons()
                         st.pyplot(fig)
                         plt.clf()
                 if model == "Régression logistique":
