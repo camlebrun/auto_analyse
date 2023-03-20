@@ -214,14 +214,14 @@ with tab6:
         X = dataframe_0[selected_columns_exp]
         y = dataframe_0[selected_columns_pred]
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+        normalisation = st.selectbox("Choisir une méthode de normalisation", ["Aucune", "MinMax Scaler", "Standard Scaler"])
+        model = st.selectbox("Choisir un modèle", ["Régression linéaire", "Régression logistique"])
         if len(selected_columns_exp) > 0 and len(selected_columns_pred) > 0:
             with st.spinner('Wait for it...'):
                 time.sleep(5)
 
             # Split des données en train et test
-                
-
-                normalisation = st.selectbox("Choisir une méthode de normalisation", ["Aucune", "MinMax Scaler", "Standard Scaler"])
+            
                 if normalisation == "Aucune":
                     X_train_std = X_train
                     X_test_std = X_test
@@ -234,10 +234,7 @@ with tab6:
                     X_train_std = scaler.fit_transform(X_train)
                     X_test_std = scaler.transform(X_test)
 
-                model = st.selectbox("Choisir un modèle", ["Régression linéaire", "Régression logistique"])
                 if model == "Régression linéaire":
-                    with st.spinner('Wait for it...'):
-                        time.sleep(5)
 
                         # Régression linéaire sur les données normalisées
                         reg_lin = LinearRegression()
