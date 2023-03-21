@@ -1,7 +1,7 @@
 import pandas as pd
 import time
 import math
-from main import read_data, data_preprocessing, plot
+from main import read_data, data_preprocessing, simple_plot
 import streamlit as st
 from io import StringIO
 import numpy as np
@@ -21,7 +21,7 @@ dataframe = None
 
 # Onglets
 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
-    ["Upload & data exploration", "Traitements des données", "Scatter plot", "Paireplot", "Corrélation", "Prédictions"])
+    ["Upload & data exploration", "Traitements des données", "Scatter plot", "Pairplot", "Corrélation", "Prédictions"])
 
 # Page d'analyse
 with tab1:
@@ -68,7 +68,7 @@ with tab1:
                 "Enter the y-axis column name",
                 col_list,
                 key=f"y_{y_counter}")
-            plot.scatter_plot(dataframe, x, y)
+            simple_plot.scatter_plot(dataframe, x, y)
             x_counter += 1
             y_counter += 1
 
@@ -119,19 +119,23 @@ with tab2:
         st.write(dataframe_copy)
 
 with tab3:
-    col_list = dataframe_copy.columns
-    x = st.selectbox(
-        "Enter the x-axis column name",
-        col_list,
-        key=f"x_{x_counter}")
-    y = st.selectbox(
-        "Enter the y-axis column name",
-        col_list,
-        key=f"y_{y_counter}")
-    plot.scatter_plot(dataframe_copy, x, y)
-    x_counter += 1
-    y_counter += 1
+    if dataframe is not None:
+        col_lis_copy = dataframe_copy.columns
+        x = st.selectbox(
+            "Enter the x-axis column name",
+            col_lis_copy,
+            key=f"x_{x_counter}")
+        y = st.selectbox(
+            "Enter the y-axis column name",
+            col_lis_copy,
+            key=f"y_{y_counter}")
+        simple_plot.scatter_plot(dataframe_copy, x, y)
+        x_counter += 1
+        y_counter += 1
 
 
 with tab4:
-    plot.pair_plot(dataframe_copy)
+    if dataframe is not None:
+        from main import PairPlot
+        pair_plot = PairPlot()
+        pair_plot.pair_plot(dataframe_copy)

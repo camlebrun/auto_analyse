@@ -7,6 +7,7 @@ import seaborn as sns
 from sklearn.preprocessing import LabelEncoder
 
 
+
 class read_data:
     def get_data_csv(file_name, sep, encoding):
         data = pd.read_csv(file_name, sep=sep, encoding=encoding)
@@ -40,7 +41,7 @@ class data_preprocessing:
         return head
 
 
-class plot:
+class simple_plot:
     def scatter_plot(data, x, y):
         col_list = data.columns
         if x == y:
@@ -51,26 +52,19 @@ class plot:
             plt.xlabel(x)
             plt.ylabel(y)
             st.pyplot(fig)
-
-    def pair_plot(data):
-        if data is not None:
-            dataframe_num = data.select_dtypes(include=[np.number])
-            fig_pairplot = sns.pairplot(
-                dataframe_num, diag_kind='kde', corner=True)
-            fig_pairplot.fig.set_size_inches(15, 10)
-            axes = fig_pairplot.axes
-            for i in range(len(axes)):
-                for j in range(len(axes)):
-                    if i == len(axes) - 1:
-                        axes[i][j].xaxis.label.set_rotation(90)
-                        axes[i][j].xaxis.labelpad = 15
-                    if j == 0:
-                        axes[i][j].yaxis.label.set_rotation(0)
-                        axes[i][j].yaxis.label.set_ha('right')
-                        axes[i][j].yaxis.labelpad = 15
-            if fig_pairplot is not None:
-                st.pyplot(fig_pairplot)
-                plt.clf()
+class PairPlot:
+    def pair_plot(self, data):
+        try:
+            if not data.empty:
+                with st.spinner("Chargement du graphique..."):
+                    dataframe_num = data.select_dtypes(include=[np.number])
+                    fig_pairplot = sns.pairplot(
+                        dataframe_num, diag_kind='kde', corner=True)
+                    st.pyplot(fig_pairplot.fig)
+            else:
+                st.warning("Please select a dataset")
+        except Exception as e:
+            st.error("An error occurred: {}".format(str(e)))
 
 
 class CleanData:
