@@ -13,7 +13,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler, LabelEncoder
 from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error
 
 st.set_page_config(layout="wide")
-st.title("Analyse de données")
+st.title("Analyse fde données")
 
 # Définir dataframe comme une variable globale
 dataframe = None
@@ -63,30 +63,13 @@ with tab1:
                 st.write("Nombre de lignes et colonnes", dataframe.shape)
                 st.write("Statistiques descriptives :")
                 st.dataframe(dataframe.describe())
-            if dataframe is not None:
-                st.title("Visualisation des données")
-                col_list = list(dataframe.columns[:-1].unique())
-                x_val = st.selectbox("Sélectionner la valeur en x", col_list)
-                y_val = st.selectbox("Sélectionner la valeur en y", col_list)
-            if x_val == y_val:
-                st.info("X et Y doivent être différentes")
-            elif dataframe is not None and x_val is not None and y_val is not None:
-                with st.spinner('Wait for it...'):
-                    time.sleep(5)
-                    fig, ax = plt.subplots()
-                    ax.scatter(dataframe[x_val], dataframe[y_val])
-                    ax.set_xlabel(x_val)
-                    ax.set_ylabel(y_val)
-                    st.pyplot(fig)
-                    plt.clf()
-    else:
-        st.error(
-            "Le fichier n'a pas été chargé correctement. Veuillez vérifier le format du fichier et réessayer.")
+
+    else: 
+        st.warning("Veuillez choisir un fichier CSV")
+
 
 with tab2:
     if dataframe is not None:
-        with st.spinner('Wait for it...'):
-            time.sleep(5)
         st.title("Prétraitement")
 
         def preprocess_column(column, option, x=None):
@@ -187,7 +170,7 @@ with tab3:
     st.write("Les données affichées sont celles du fichier modifiable dans l'onglet traitement des données")
     if dataframe is not None:
         col_list_0 = list(dataframe_0.columns[:-1].unique())
-        st.markdown(col_list)
+        st.markdown(col_list_0)
         x_val_0 = st.selectbox(
             "Sélectionner la valeur en x",
             col_list_0,
@@ -200,7 +183,7 @@ with tab3:
             st.info("X et Y doivent être différentes")
         elif dataframe is not None and x_val_0 is not None and y_val_0 is not None:
             with st.spinner('Wait for it...'):
-                time.sleep(5)
+                #time.sleep(5)
                 fig, ax = plt.subplots()
                 ax.scatter(dataframe_0[x_val_0], dataframe_0[y_val_0])
                 ax.set_xlabel(x_val_0)
@@ -214,7 +197,7 @@ with tab4:
     if dataframe is not None:
         dataframe_num = dataframe_0.select_dtypes(include=[np.number])
         with st.spinner('Wait for it...'):
-            time.sleep(5)
+            #time.sleep(5)
             fig_pairplot = sns.pairplot(
                 dataframe_num, diag_kind='kde', corner=True)
             fig_pairplot.fig.set_size_inches(15, 10)
@@ -237,8 +220,7 @@ with tab5:
     st.write("Correlation")
     if dataframe is not None:
         dataframe_num = dataframe_0.select_dtypes(include=[np.number])
-        with st.spinner('Wait for it...'):
-            time.sleep(5)
+
         corr_matrix = round(dataframe_num.corr(), 2)
         headmap_cor = sns.heatmap(
             corr_matrix,
@@ -277,7 +259,7 @@ with tab6:
                 "Régression linéaire", "Régression logistique"])
         if len(selected_columns_exp) > 0 and len(selected_columns_pred) > 0:
             with st.spinner('Wait for it...'):
-                time.sleep(5)
+                #time.sleep(5)
 
             # Split des données en train et test
 

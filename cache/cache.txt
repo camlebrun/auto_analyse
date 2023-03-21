@@ -1,0 +1,16 @@
+"""            if dataframe is not None:
+                st.title("Visualisation des données")
+                col_list = list(dataframe.columns[:-1].unique())
+                x_val = st.selectbox("Sélectionner la valeur en x", col_list)
+                y_val = st.selectbox("Sélectionner la valeur en y", col_list)
+            if x_val == y_val:
+                st.info("X et Y doivent être différentes")
+            elif dataframe is not None and x_val is not None and y_val is not None:
+                with st.spinner('Wait for it...'):
+                    ##time.sleep(5)
+                    fig, ax = plt.subplots()
+                    ax.scatter(dataframe[x_val], dataframe[y_val])
+                    ax.set_xlabel(x_val)
+                    ax.set_ylabel(y_val)
+                    st.pyplot(fig)
+                    plt.clf()"""
